@@ -54,10 +54,16 @@ contract Vault {
         require(_amount > 0, "Invalid amount!");
         UserStake storage userStake = stakes[msg.sender];
 
-        _updateAccount(userStake);
-        userStake.tokenAmount += _amount;
+        if (userStake.tokenAmount > 0) {
+            _updateAccount(userStake);
+        }
+        else {
+            userStake.lastDepositTimeStamp = block.timestamp;
+        }
 
+        userStake.tokenAmount += _amount;
         primeToken.transferFrom(msg.sender, address(this), _amount);
+        
         emit Staked(msg.sender, _amount);
     }
 
