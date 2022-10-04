@@ -10,6 +10,9 @@ describe("Vault", function () {
   let SECONDS_IN_YEAR = 365 * 24 * 60 * 60;
   let INITIAL_DELAY = 1000;
 
+  let ERROR_INVALID_AMOUNT = "InvalidAmount";
+  let ERROR_NO_PRIOR_STAKING = "NoPriorStaking";
+
   async function deployVaultFixture() {
     const [owner, user] = await ethers.getSigners();
 
@@ -28,7 +31,7 @@ describe("Vault", function () {
     it("should not allow staking with invalid amount", async function() {
       const {vault} = await loadFixture(deployVaultFixture);
       
-      await expect(vault.stake(0)).to.be.revertedWith("Invalid amount!");
+      await expect(vault.stake(0)).to.be.revertedWithCustomError(vault, ERROR_INVALID_AMOUNT);
     });
 
     it("should not allow staking if tokens are not approved", async function() {
@@ -65,7 +68,7 @@ describe("Vault", function () {
     it("should revert in case user has not staked", async function() {
         const {user, vault} = await loadFixture(deployVaultFixture);
 
-        await expect(vault.connect(user).withdrawAllRewards()).to.be.revertedWith("No amount staked!");
+        await expect(vault.connect(user).withdrawAllRewards()).to.be.revertedWithCustomError(vault, ERROR_NO_PRIOR_STAKING);
     });
 
     it("should withdraw correct amount of rewards accrued", async function() {
@@ -121,7 +124,7 @@ describe("Vault", function () {
     it("should revert in case user has not staked", async function() {
         const {user, vault} = await loadFixture(deployVaultFixture);
 
-        await expect(vault.connect(user).unstake(100)).to.be.revertedWith("No amount staked!");
+        await expect(vault.connect(user).unstake(100)).to.be.revertedWithCustomError(vault, ERROR_NO_PRIOR_STAKING);
     });
 
     it("should emit Unstaked event in a happy case scenario", async function() {

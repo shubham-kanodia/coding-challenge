@@ -16,8 +16,13 @@ contract Vault {
     event RewardsWithdrawn(address user, uint256 rewards);
     event Unstaked(address user, uint256 _amount);
 
+    error InvalidAmount();
+    error NoPriorStaking();
+
     modifier hasStaked() {
-        require(stakes[msg.sender].tokenAmount != 0, "No amount staked!");
+        if (stakes[msg.sender].tokenAmount == 0) {
+            revert NoPriorStaking();
+        }
         _;
     }
 
@@ -51,7 +56,9 @@ contract Vault {
     }
 
     function stake(uint256 _amount) public {
-        require(_amount > 0, "Invalid amount!");
+        if (_amount == 0) {
+            revert InvalidAmount();
+        }
         UserStake storage userStake = stakes[msg.sender];
 
         if (userStake.tokenAmount > 0) {
