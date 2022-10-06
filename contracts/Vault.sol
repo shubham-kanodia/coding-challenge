@@ -8,7 +8,7 @@ import "./Prime.sol";
 contract Vault {
     struct UserStake {
         uint256 tokenAmount;
-        uint256 lastDepositTimeStamp;
+        uint256 lastUpdatedTimeStamp;
         uint256 rewardsAccrued;
     }
 
@@ -39,20 +39,20 @@ contract Vault {
 
     function _calculateRewards(
         uint256 _tokenAmount,
-        uint256 _lastDepositTimeStamp
+        uint256 _lastUpdatedTimeStamp
     ) internal view returns (uint256) {
-        return ((_tokenAmount * (block.timestamp - _lastDepositTimeStamp)) /
+        return ((_tokenAmount * (block.timestamp - _lastUpdatedTimeStamp)) /
             (100 * secondsInYear));
     }
 
     function _updateAccount(UserStake storage _stake) internal {
         uint256 rewardsAccruedSinceLastDeposit = _calculateRewards(
             _stake.tokenAmount,
-            _stake.lastDepositTimeStamp
+            _stake.lastUpdatedTimeStamp
         );
 
         _stake.rewardsAccrued += rewardsAccruedSinceLastDeposit;
-        _stake.lastDepositTimeStamp = block.timestamp;
+        _stake.lastUpdatedTimeStamp = block.timestamp;
     }
 
     function stake(uint256 _amount) public {
@@ -65,7 +65,7 @@ contract Vault {
             _updateAccount(userStake);
         }
         else {
-            userStake.lastDepositTimeStamp = block.timestamp;
+            userStake.lastUpdatedTimeStamp = block.timestamp;
         }
 
         userStake.tokenAmount += _amount;
